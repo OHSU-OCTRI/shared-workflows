@@ -14,8 +14,8 @@ Builds, tests, and publishes a Maven project to GitHub Packages.
 | Input | Type | Required | Description |
 |-------|------|----------|-------------|
 | `java_version` | string | yes | Java version for `setup-java` |
-| `publish_to_github_packages | boolean | no | Whether to publish build to GitHub packages. Defaults to false. |
-| `publish_to_maven_central | boolean | no | Whether to publish to Maven Central. Defaults to false. |
+| `publish_to_github_packages` | boolean | no | Whether to publish build to GitHub packages. Defaults to false. |
+| `publish_to_maven_central` | boolean | no | Whether to publish to Maven Central. Defaults to false. |
 
 **Required secrets:** `MAVEN_GPG_PRIVATE_KEY`, `MAVEN_GPG_PASSPHRASE`, `MAVEN_USERNAME`, `MAVEN_PASSWORD`
 
