@@ -69,7 +69,7 @@ jobs:
         uses: actions/setup-java@v5
         with:
           distribution: temurin
-          java-version: '17'
+          java-version: ${{ inputs.java_version }}
           cache: maven
           server-id: central
           server-username: MAVEN_USERNAME
