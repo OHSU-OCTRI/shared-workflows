@@ -17,6 +17,19 @@ on:
         type: boolean
         required: false
         default: false
+    secrets:
+      MAVEN_GPG_PASSPHRASE:
+        description: GPG passphrase to use to sign Maven artifacts
+        required: true
+      MAVEN_GPG_PRIVATE_KEY:
+        description: GPG key to use to sign Maven artifacts
+        required: true
+      MAVEN_PASSWORD:
+        description: Maven Central password to use to publish artifacts
+        required: true
+      MAVEN_USERNAME:
+        description: Maven Central username to use to publish artifacts
+        required: true
 
 jobs:
   build-java-source:
