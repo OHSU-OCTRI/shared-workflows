@@ -4,6 +4,27 @@ This repository contains reusable GitHub Actions workflows for OCTRI repositorie
 
 ## Workflows
 
+### `dependabot-changelog-update.yaml`
+
+Automatically appends Dependabot dependency updates to `CHANGELOG.md` when a PR is labeled `dependencies`.
+
+**Trigger:** `workflow_call`
+
+## Usage
+
+Reference these workflows from a caller workflow using `workflow_call`:
+
+```yaml
+jobs:
+  build:
+    uses: OHSU-OCTRI/shared-actions-workflows/.github/workflows/java-build.yaml@main
+    with:
+      java_version: "21"
+    secrets: inherit
+```
+
+---
+
 ### `java-build.yaml`
 
 Builds, tests, and publishes a Maven project to GitHub Packages.
@@ -39,21 +60,16 @@ Performs a full Maven release: updates the changelog, cuts a Git tag, publishes 
 
 ---
 
-### `dependabot-changelog-update.yaml`
+### `node-test.yaml`
 
-Automatically appends Dependabot dependency updates to `CHANGELOG.md` when a PR is labeled `dependencies`.
+Runs Node.js tests. Your `package.json` file must have a script named `test:ci` that runs your test suite.
 
 **Trigger:** `workflow_call`
 
-## Usage
+**Inputs:**
+| Input | Type | Required | Description |
+|-------|------|----------|-------------|
+| `node_version` | string | yes | Node.js version for `setup-node` |
+| `run_type_checks` | boolean | no | Whether to run type checks. Defaults to false. Requires a script named `test:types`. |
 
-Reference these workflows from a caller workflow using `workflow_call`:
-
-```yaml
-jobs:
-  build:
-    uses: OHSU-OCTRI/shared-actions-workflows/.github/workflows/java-build.yaml@main
-    with:
-      java_version: "21"
-    secrets: inherit
-```
+**Required secrets:** None

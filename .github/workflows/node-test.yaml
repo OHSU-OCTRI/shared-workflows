@@ -1,0 +1,41 @@
+name: Node.js tests
+
+on:
+  workflow_call:
+    inputs:
+      node_version:
+        description: Node.js version to use with the setup-node action
+        type: string
+        required: true
+      run_type_checks:
+        description: Whether to run type checks
+        type: boolean
+        required: false
+        default: false
+
+jobs:
+  run-node-tests:
+    name: Run Node.js tests
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: ${{ inputs.node_version }}
+          cache: npm
+
+      - name: Install packages
+        run: npm install
+
+      # Warn if TypeScript type checks are failing
+      - name: Run type checks
+        if: ${{ inputs.run_type_checks }}
+        run: npm run test:types || echo "::warning ::Type checks failed with exit code $?"
+
+      - name: Run tests
+        run: npm run test:ci
