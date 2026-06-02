@@ -54,6 +54,15 @@ jobs:
       - name: Build and test
         run: mvn package
 
+      - name: Upload application JAR for container build
+        if: vars.APP_JAR_NAME != ''
+        uses: actions/upload-artifact@v7
+        with:
+          name: ${{ github.sha }}-jar
+          path: target/${{ vars.APP_JAR_NAME }}
+          overwrite: true
+          retention-days: 3
+
       - name: Get version from POM
         id: get-version
         run: |
