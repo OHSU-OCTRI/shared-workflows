@@ -40,6 +40,25 @@ Builds, tests, and publishes a Maven project to GitHub Packages.
 
 **Required secrets:** `MAVEN_GPG_PRIVATE_KEY`, `MAVEN_GPG_PASSPHRASE`, `MAVEN_USERNAME`, `MAVEN_PASSWORD`
 
+If the optional `APP_JAR_NAME` repository variable is defined, the specified JAR file in the `target` directory is uploaded for use by the `java-image-build.yaml` workflow.
+
+---
+
+### `java-image-build.yaml`
+
+Builds a container image and pushes to GitHub Container Registry. Use the `java-build.yaml` workflow to build and upload the application JAR file required by this workflow.
+
+**Inputs:**
+| Input | Type | Required | Description |
+|-------|------|----------|-------------|
+| `platforms` | string | no | Comma-separated string of platforms to include in the image (default: linux/amd64,linux/arm64). |
+
+**Trigger:** `workflow_call`
+
+**Required secrets/vars:** `GITHUB_TOKEN`, `APP_JAR_NAME` (repository variable), `IMAGE_NAME` (repository variable)
+
+The `APP_JAR_NAME` repository variable must be set to the name of the application JAR file in the `target` directory to ensure that the JAR file is available for the container build, and the `IMAGE_NAME` repository is required to push the image to the registry.
+
 ---
 
 ### `java-release.yaml`
