@@ -2,14 +2,6 @@
 
 This repository contains reusable GitHub Actions workflows for OCTRI repositories.
 
-## Workflows
-
-### `dependabot-changelog-update.yaml`
-
-Automatically appends Dependabot dependency updates to `CHANGELOG.md` when a PR is labeled `dependencies`.
-
-**Trigger:** `workflow_call`
-
 ## Usage
 
 Reference these workflows from a caller workflow using `workflow_call`:
@@ -22,6 +14,33 @@ jobs:
       java_version: "21"
     secrets: inherit
 ```
+
+## Workflows
+
+### `container-image-build.yaml`
+
+Builds a container image and pushes to GitHub Container Registry. Optionally downloads a named artifact for use in the build, such as that created by `java-build.yaml`.
+
+**Inputs:**
+| Input | Type | Required | Description |
+|-------|------|----------|-------------|
+| `platforms` | string | no | Comma-separated string of platforms to include in the image (default: linux/amd64,linux/arm64). |
+| `artifact_name` | string | no | Optional artifact to download and use in the build, as created by `actions/upload-artifact`. |
+| `artifact_path` | string | no | Optional destination path for the downloaded artifact. |
+
+**Trigger:** `workflow_call`
+
+**Required secrets/vars:** `GITHUB_TOKEN`, `IMAGE_NAME` (repository variable)
+
+An `IMAGE_NAME` repository variable is required to push the image to the registry. This should be set to the full `ghcr.io/OHSU-OCTRI/...` image name.
+
+---
+
+### `dependabot-changelog-update.yaml`
+
+Automatically appends Dependabot dependency updates to `CHANGELOG.md` when a PR is labeled `dependencies`.
+
+**Trigger:** `workflow_call`
 
 ---
 
