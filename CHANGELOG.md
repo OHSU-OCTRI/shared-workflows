@@ -20,3 +20,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Dependencies
 
 - Bumps [actions/checkout](https://github.com/actions/checkout) from 6 to 7
+- Bumps [actions/download-artifact](https://github.com/actions/download-artifact) from 7 to 8
