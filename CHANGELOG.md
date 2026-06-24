@@ -16,3 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Handle self-contained image builds without artifacts (RFS-256)
+
+### Dependencies
+
+- Bumps [actions/checkout](https://github.com/actions/checkout) from 6 to 7
