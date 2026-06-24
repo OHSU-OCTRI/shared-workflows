@@ -44,7 +44,7 @@ jobs:
             type=raw,value=latest,enable={{is_default_branch}}
 
       - name: Download jar file
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
         with:
           name: ${{ github.sha }}-jar
           path: target
