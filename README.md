@@ -9,7 +9,7 @@ Reference these workflows from a caller workflow using `workflow_call`:
 ```yaml
 jobs:
   build:
-    uses: OHSU-OCTRI/shared-actions-workflows/.github/workflows/java-build.yaml@main
+    uses: OHSU-OCTRI/shared-workflows/.github/workflows/java-build.yaml@main
     with:
       java_version: "21"
     secrets: inherit
@@ -62,6 +62,19 @@ Builds, tests, and publishes a Maven project to GitHub Packages.
 If the optional `APP_JAR_NAME` repository variable is defined, the specified JAR file in the `target` directory is uploaded for use by the `java-image-build.yaml` workflow.
 
 ---
+
+### `java-test-build.yaml`
+
+Builds and tests a Maven project for pull requests (without requiring access to any secrets).
+
+**Trigger:** `workflow_call`
+
+**Inputs:**
+| Input | Type | Required | Description |
+|-------|------|----------|-------------|
+| `java_version` | string | yes | Java version for `setup-java` |
+
+--- 
 
 ### `java-image-build.yaml`
 

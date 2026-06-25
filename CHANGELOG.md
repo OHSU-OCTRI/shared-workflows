@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Initial commit
 - Add workflow that runs Node.js tests
 - Add infrastructure for container image builds (RFS-256)
+- Add a workflow that builds the Maven project without publishing (CIS-3773)
 
 ### Changed
 
