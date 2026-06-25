@@ -48,6 +48,8 @@ Automatically appends Dependabot dependency updates to `CHANGELOG.md` when a PR 
 
 Builds, tests, and publishes a Maven project to GitHub Packages.
 
+See `java-test-build.yaml` for a similar workflow that does not publish the build artifacts.
+
 **Trigger:** `workflow_call`
 
 **Inputs:**
@@ -62,19 +64,6 @@ Builds, tests, and publishes a Maven project to GitHub Packages.
 If the optional `APP_JAR_NAME` repository variable is defined, the specified JAR file in the `target` directory is uploaded for use by the `java-image-build.yaml` workflow.
 
 ---
-
-### `java-test-build.yaml`
-
-Builds and tests a Maven project for pull requests (without requiring access to any secrets).
-
-**Trigger:** `workflow_call`
-
-**Inputs:**
-| Input | Type | Required | Description |
-|-------|------|----------|-------------|
-| `java_version` | string | yes | Java version for `setup-java` |
-
---- 
 
 ### `java-image-build.yaml`
 
@@ -110,6 +99,21 @@ Performs a full Maven release: updates the changelog, cuts a Git tag, publishes 
 **Required secrets/vars:** `GITHUB_TOKEN`, `IMAGE_NAME` (repository variable)
 
 ---
+
+### `java-test-build.yaml`
+
+Builds and tests a Maven project for pull requests (without requiring access to any secrets).
+
+See `java-build.yaml` for a similar workflow that publishes the build artifacts to GitHub Packages and Maven Central.
+
+**Trigger:** `workflow_call`
+
+**Inputs:**
+| Input | Type | Required | Description |
+|-------|------|----------|-------------|
+| `java_version` | string | yes | Java version for `setup-java` |
+
+--- 
 
 ### `node-test.yaml`
 
