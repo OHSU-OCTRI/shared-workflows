@@ -9,7 +9,7 @@ Reference these workflows from a caller workflow using `workflow_call`:
 ```yaml
 jobs:
   build:
-    uses: OHSU-OCTRI/shared-actions-workflows/.github/workflows/java-build.yaml@main
+    uses: OHSU-OCTRI/shared-workflows/.github/workflows/java-build.yaml@main
     with:
       java_version: "21"
     secrets: inherit
@@ -47,6 +47,8 @@ Automatically appends Dependabot dependency updates to `CHANGELOG.md` when a PR 
 ### `java-build.yaml`
 
 Builds, tests, and publishes a Maven project to GitHub Packages.
+
+See `java-test-build.yaml` for a similar workflow that does not publish the build artifacts.
 
 **Trigger:** `workflow_call`
 
@@ -97,6 +99,21 @@ Performs a full Maven release: updates the changelog, cuts a Git tag, publishes 
 **Required secrets/vars:** `GITHUB_TOKEN`, `IMAGE_NAME` (repository variable)
 
 ---
+
+### `java-test-build.yaml`
+
+Builds and tests a Maven project for pull requests (without requiring access to any secrets).
+
+See `java-build.yaml` for a similar workflow that publishes the build artifacts to GitHub Packages and Maven Central.
+
+**Trigger:** `workflow_call`
+
+**Inputs:**
+| Input | Type | Required | Description |
+|-------|------|----------|-------------|
+| `java_version` | string | yes | Java version for `setup-java` |
+
+--- 
 
 ### `node-test.yaml`
 
