@@ -66,7 +66,7 @@ jobs:
           -DautoVersionSubmodules=true \
           -DreleaseVersion="$VERSION" \
           -DscmReleaseCommitComment="Release version $VERSION" \
-          -DdevelopmentVersion="${VERSION}-SNAPSHOT" \
+          -DdevelopmentVersion="${DEV_VERSION}-SNAPSHOT" \
           -DscmDevelopmentCommitComment="Next development version - $DEV_VERSION" \
           -Dtag="v${VERSION}" \
           -Dusername=${{ github.actor }} \
