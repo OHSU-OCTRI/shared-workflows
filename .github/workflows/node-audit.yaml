@@ -16,12 +16,7 @@ on:
         description: Text for the title line of the git commit
         type: string
         required: false
-        default: 'chore: Node security update'
-      cleanup_previous:
-        description: Whether to cleanup unresolved PR/branch and start over
-        type: boolean
-        required: false
-        default: true
+        default: 'Node security update'
 
 jobs:
   run-node-audit:
@@ -60,7 +55,6 @@ jobs:
           git config --global user.name "github-actions[bot]"
 
       - name: Clean up previous branch/PR
-        if: ${{ inputs.cleanup_previous }}
         env:
           BRANCH: ${{ inputs.branch_name}}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
