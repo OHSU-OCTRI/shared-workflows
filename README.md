@@ -115,6 +115,25 @@ See `java-build.yaml` for a similar workflow that publishes the build artifacts 
 
 --- 
 
+### `node-audit.yaml`
+
+Fixes security vulnerabilities in Node.js dependencies and creates a PR using a new branch. This pipeline uses the `node-test.yaml` workflow. 
+
+This workflow will fail if `npm audit fix` generates any errors, such as breaking dependency updates or version conflicts.
+
+**Trigger:** `workflow_call`
+
+**Inputs:**
+| Input | Type | Required | Description |
+|-------|------|----------|-------------|
+| `node_version` | string | yes | Node.js version for `setup-node` |
+| `branch_name` | string | yes | Name for the PR HEAD branch. |
+| `commit_title` | string | no | Title for the git commit. |
+
+**Required secrets:** `GITHUB_TOKEN`
+
+--- 
+
 ### `node-test.yaml`
 
 Runs Node.js tests. Your `package.json` file must have a script named `test:ci` that runs your test suite.

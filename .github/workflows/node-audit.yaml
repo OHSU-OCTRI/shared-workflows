@@ -1,0 +1,96 @@
+name: Node.js tests
+
+on:
+  workflow_call:
+    inputs:
+      node_version:
+        description: Node.js version to use with the setup-node action
+        type: string
+        required: true
+      branch_name:
+        description: Name for the new PR branch
+        type: string
+        required: false
+        default: chore/node-audit
+      commit_title:
+        description: Text for the title line of the git commit
+        type: string
+        required: false
+        default: 'Node security update'
+
+jobs:
+  run-node-audit:
+    name: Run Node.js security update
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+      contents: read
+      contents: write
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: ${{ inputs.node_version }}
+          cache: npm
+
+      - name: Fix Node.js vulnerabilities
+        id: audit-step
+        run: |
+          echo "AUDIT_REPORT<<EOF" >> "$GITHUB_OUTPUT"
+          npm audit fix &>> "$GITHUB_OUTPUT"
+          echo "EOF" >> "$GITHUB_OUTPUT"
+          if [ -n "$(git status --porcelain)" ]; then
+            echo "CHANGED=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "CHANGED=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Set up Git
+        run: |
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config --global user.name "github-actions[bot]"
+
+      - name: Clean up previous branch/PR
+        env:
+          BRANCH: ${{ inputs.branch_name}}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Clean up PR and remote branch
+          PR_NUMBER=$(gh pr list --head "$BRANCH" --state open --json number --jq '.[0].number')
+          if [ -n "$PR_NUMBER" ]; then
+            gh pr close "$PR_NUMBER"
+            git push origin --delete "$BRANCH"
+            git fetch --prune
+          fi
+          # Clean up local branch
+          if [ -n "$(git branch --list "$BRANCH")" ]; then
+            git branch -D "$BRANCH"
+          fi
+
+      - name: Establish branch and create commit
+        if: steps.audit-step.outputs.CHANGED == 'true'
+        env:
+          COMMIT_TITLE: ${{ inputs.commit_title }}
+          BRANCH_NAME: ${{ inputs.branch_name }}
+        run: |
+          git checkout -b "$BRANCH_NAME"
+          git add package.json package-lock.json
+          git commit -m "$COMMIT_TITLE" -m 'Ran `npm audit fix` to resolve Node.js vulnerabilities'
+          git push -u origin "$BRANCH_NAME"
+
+      - name: Create PR for new branch
+        if: steps.audit-step.outputs.CHANGED == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          BRANCH_NAME: ${{ inputs.branch_name }}
+          AUDIT_REPORT: ${{ steps.audit-step.outputs.AUDIT_REPORT }}
+          BASE_BRANCH: ${{ github.ref_name }}
+        run: |
+          gh pr create \
+            --title "Chore: Node Security Audit" \
+            --body "$AUDIT_REPORT" \
+            --base "$BASE_BRANCH" \
+            --head "$BRANCH_NAME"
