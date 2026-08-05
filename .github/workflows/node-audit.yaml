@@ -55,7 +55,8 @@ jobs:
       - name: Clean up previous branch/PR
         env:
           BRANCH: ${{ inputs.branch_name}}
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.PR_AUTOMATION_TOKEN }}
         run: |
           # Clean up PR and remote branch
           PR_NUMBER=$(gh pr list --head "$BRANCH" --state open --json number --jq '.[0].number')
@@ -83,7 +84,8 @@ jobs:
       - name: Create PR for new branch
         if: steps.audit-step.outputs.CHANGED == 'true'
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.PR_AUTOMATION_TOKEN }}
           BRANCH_NAME: ${{ inputs.branch_name }}
           AUDIT_REPORT: ${{ steps.audit-step.outputs.AUDIT_REPORT }}
           BASE_BRANCH: ${{ github.ref_name }}
