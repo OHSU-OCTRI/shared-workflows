@@ -49,7 +49,6 @@ jobs:
           fi
 
       - name: Set up Git
-        if: steps.audit-step.outputs.CHANGED == 'true'
         run: |
           git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git config --global user.name "github-actions[bot]"
