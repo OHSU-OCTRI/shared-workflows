@@ -117,9 +117,12 @@ See `java-build.yaml` for a similar workflow that publishes the build artifacts 
 
 ### `node-audit.yaml`
 
-Fixes security vulnerabilities in Node.js dependencies and creates a PR using a new branch. Output from the `npm audit fix` step is included in the PR body, and may indicated any issues regarding breaking changes or dependency conflicts.
+Fixes security vulnerabilities in Node.js dependencies and creates a PR using a new branch. Output produced by `audit-step` is included in the PR body, and may indicate potential issues regarding breaking changes or dependency conflicts.
 
-Most likely causes of failure are either permission issues related to creation/deletion of branchs and pull requests, or errors caused by `git`/`gh` due to unexpected state of branches and PRs.
+Most likely causes of failure include:
+
+- Permission issues related to `PR_AUTOMATION_TOKEN`, or 
+- Errors caused by `git`/`gh` due to unexpected state of branches and PRs
 
 **Trigger:** `workflow_call`
 
@@ -130,7 +133,7 @@ Most likely causes of failure are either permission issues related to creation/d
 | `branch_name` | string | yes | Name for the PR HEAD branch. |
 | `commit_title` | string | no | Title for the git commit. |
 
-**Required secrets:** `PR_AUTOMATION_TOKEN` (organization PAT, requires read/write for contents and pull requests)
+**Required secrets:** `PR_AUTOMATION_TOKEN` (organization PAT, requires read/write permissions for contents and pull requests)
 
 --- 
 
