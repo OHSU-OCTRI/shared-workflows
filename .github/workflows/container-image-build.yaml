@@ -16,6 +16,10 @@ on:
         description: "Optional destination path for the artifact."
         type: string
         required: false
+    outputs:
+      digest:
+        description: "Image digest"
+        value: ${{ jobs.build-image.outputs.digest }}
 
 jobs:
   build-image:
@@ -25,6 +29,8 @@ jobs:
     permissions:
       contents: read
       packages: write
+    outputs:
+      digest: ${{ steps.build-image.outputs.digest }}
     steps:
       - name: Check out repository
         uses: actions/checkout@v7
@@ -59,6 +65,7 @@ jobs:
           path: ${{ inputs.artifact_path }}
 
       - name: Build Docker image
+        id: build-image
         uses: docker/build-push-action@v7
         with:
           push: true

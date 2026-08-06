@@ -28,6 +28,11 @@ Builds a container image and pushes to GitHub Container Registry. Optionally dow
 | `artifact_name` | string | no | Optional artifact to download and use in the build, as created by `actions/upload-artifact`. |
 | `artifact_path` | string | no | Optional destination path for the downloaded artifact. |
 
+**Outputs:**
+| Output | Type | Description |
+|--------|------|-------------|
+| `digest` | string | Digest of the image in `sha256:HASH_VALUE` format |
+
 **Trigger:** `workflow_call`
 
 **Required secrets/vars:** `GITHUB_TOKEN`, `IMAGE_NAME` (repository variable)
@@ -74,6 +79,11 @@ Builds a container image and pushes to GitHub Container Registry. Use the `java-
 |-------|------|----------|-------------|
 | `platforms` | string | no | Comma-separated string of platforms to include in the image (default: linux/amd64,linux/arm64). |
 
+**Outputs:**
+| Output | Type | Description |
+|--------|------|-------------|
+| `digest` | string | Digest of the image in `sha256:HASH_VALUE` format |
+
 **Trigger:** `workflow_call`
 
 **Required secrets/vars:** `GITHUB_TOKEN`, `APP_JAR_NAME` (repository variable), `IMAGE_NAME` (repository variable)
@@ -113,7 +123,7 @@ See `java-build.yaml` for a similar workflow that publishes the build artifacts 
 |-------|------|----------|-------------|
 | `java_version` | string | yes | Java version for `setup-java` |
 
---- 
+---
 
 ### `node-audit.yaml`
 
@@ -135,7 +145,7 @@ Most likely causes of failure include:
 
 **Required secrets:** `PR_AUTOMATION_TOKEN` (organization PAT, requires read/write permissions for contents and pull requests)
 
---- 
+---
 
 ### `node-test.yaml`
 

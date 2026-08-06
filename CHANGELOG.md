@@ -18,6 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Handle self-contained image builds without artifacts (RFS-256)
+- Output image digest from image build workflows to facilitate GitOps workflows (CIS-3818)
 
 ### Fixed
 
