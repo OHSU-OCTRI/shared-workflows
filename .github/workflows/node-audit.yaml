@@ -39,7 +39,7 @@ jobs:
         id: audit-step
         run: |
           echo "AUDIT_REPORT<<EOF" >> "$GITHUB_OUTPUT"
-          npm audit fix &>> "$GITHUB_OUTPUT"
+          npm audit fix &>> "$GITHUB_OUTPUT" || true
           echo "EOF" >> "$GITHUB_OUTPUT"
           if [ -n "$(git status --porcelain)" ]; then
             echo "CHANGED=true" >> "$GITHUB_OUTPUT"
@@ -55,13 +55,15 @@ jobs:
       - name: Clean up previous branch/PR
         env:
           BRANCH: ${{ inputs.branch_name}}
-          # GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GH_TOKEN: ${{ secrets.PR_AUTOMATION_TOKEN }}
         run: |
-          # Clean up PR and remote branch
+          # Clean up PR
           PR_NUMBER=$(gh pr list --head "$BRANCH" --state open --json number --jq '.[0].number')
           if [ -n "$PR_NUMBER" ]; then
             gh pr close "$PR_NUMBER"
+          fi
+          # Clean up remote branch
+          if [ -n "$(git ls-remote origin "$BRANCH")" ]; then
             git push origin --delete "$BRANCH"
             git fetch --prune
           fi
@@ -84,7 +86,6 @@ jobs:
       - name: Create PR for new branch
         if: steps.audit-step.outputs.CHANGED == 'true'
         env:
-          # GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GH_TOKEN: ${{ secrets.PR_AUTOMATION_TOKEN }}
           BRANCH_NAME: ${{ inputs.branch_name }}
           AUDIT_REPORT: ${{ steps.audit-step.outputs.AUDIT_REPORT }}

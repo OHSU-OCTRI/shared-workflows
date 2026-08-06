@@ -117,9 +117,9 @@ See `java-build.yaml` for a similar workflow that publishes the build artifacts 
 
 ### `node-audit.yaml`
 
-Fixes security vulnerabilities in Node.js dependencies and creates a PR using a new branch. This pipeline uses the `node-test.yaml` workflow. 
+Fixes security vulnerabilities in Node.js dependencies and creates a PR using a new branch. Output from the `npm audit fix` step is included in the PR body, and may indicated any issues regarding breaking changes or dependency conflicts.
 
-This workflow will fail if `npm audit fix` generates any errors, such as breaking dependency updates or version conflicts.
+Most likely causes of failure are either permission issues related to creation/deletion of branchs and pull requests, or errors caused by `git`/`gh` due to unexpected state of branches and PRs.
 
 **Trigger:** `workflow_call`
 
@@ -130,7 +130,7 @@ This workflow will fail if `npm audit fix` generates any errors, such as breakin
 | `branch_name` | string | yes | Name for the PR HEAD branch. |
 | `commit_title` | string | no | Title for the git commit. |
 
-**Required secrets:** `GITHUB_TOKEN`
+**Required secrets:** `PR_AUTOMATION_TOKEN` (organization PAT, requires read/write for contents and pull requests)
 
 --- 
 
