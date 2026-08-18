@@ -1,0 +1,86 @@
+---
+name: Node.js Release
+
+on:
+  workflow_call:
+    inputs:
+      version:
+        description: Version to release
+        type: string
+        required: true
+      node_version:
+        description: Node.js version to use with the setup-node action
+        type: string
+        required: true
+      update_major_version_tag:
+        description: Force update major version tag (e.g. for actions)
+        type: boolean
+        required: false
+        default: false
+
+jobs:
+  prepare-release:
+    name: Prepare release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+    - name: Check out repository
+      uses: actions/checkout@v7
+
+    - name: Set up Java build environment
+      uses: actions/setup-node@v7
+      with:
+        node-version: ${{ inputs.node_version }}
+        cache: npm
+
+    - name: Set up Git
+      run: |
+        git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+        git config --global user.name "github-actions[bot]"
+
+    - name: Update CHANGELOG.md
+      id: update_changelog
+      uses: thomaseizinger/keep-a-changelog-new-release@3.1.0
+      with:
+        tag: v${{ inputs.version }}
+
+    - name: Commit CHANGELOG.md
+      run: |
+        git add CHANGELOG.md
+        git commit -m "Add version ${VERSION} to CHANGELOG.md"
+      env:
+        VERSION: ${{ inputs.version }}
+
+    - name: Tag release
+      run: |
+        npm version ${{ inputs.version }} -m "Release version %s"
+        git push origin main
+        git push origin v${{ inputs.version }}
+
+    - name: Create GitHub release
+      uses: softprops/action-gh-release@v3
+      with:
+        body: ${{ steps.update_changelog.outputs.release-notes }}
+        draft: false
+        prerelease: false
+        name: ${{ inputs.version }}
+        tag_name: v${{ inputs.version }}
+        generate_release_notes: false
+
+    - name: Extract major version
+      id: extract_major_version
+      if: ${{ inputs.update_major_version_tag }}
+      run: |
+        echo "major_version=${VERSION%%.*}" >> "$GITHUB_OUTPUT"
+      env:
+        VERSION: ${{ inputs.version }}
+
+    - name: Force update major version tag
+      if: ${{ inputs.update_major_version_tag }}
+      run: |
+        git tag -f v${MAJOR_VERSION}
+        git push origin v${MAJOR_VERSION} --force
+      env:
+        MAJOR_VERSION: ${{ steps.extract_major_version.outputs.major_version }}
