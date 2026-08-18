@@ -69,18 +69,11 @@ jobs:
         tag_name: v${{ inputs.version }}
         generate_release_notes: false
 
-    - name: Extract major version
-      id: extract_major_version
-      if: ${{ inputs.update_major_version_tag }}
-      run: |
-        echo "major_version=${VERSION%%.*}" >> "$GITHUB_OUTPUT"
-      env:
-        VERSION: ${{ inputs.version }}
-
     - name: Force update major version tag
       if: ${{ inputs.update_major_version_tag }}
       run: |
+        MAJOR_VERSION=${VERSION%%.*}
         git tag -f v${MAJOR_VERSION}
         git push origin v${MAJOR_VERSION} --force
       env:
-        MAJOR_VERSION: ${{ steps.extract_major_version.outputs.major_version }}
+        VERSION: ${{ inputs.version }}
