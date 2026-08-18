@@ -131,7 +131,7 @@ Fixes security vulnerabilities in Node.js dependencies and creates a PR using a 
 
 Most likely causes of failure include:
 
-- Permission issues related to `PR_AUTOMATION_TOKEN`, or 
+- Permission issues related to `PR_AUTOMATION_TOKEN`, or
 - Errors caused by `git`/`gh` due to unexpected state of branches and PRs
 
 **Trigger:** `workflow_call`
@@ -144,6 +144,23 @@ Most likely causes of failure include:
 | `commit_title` | string | no | Title for the git commit. |
 
 **Required secrets:** `PR_AUTOMATION_TOKEN` (organization PAT, requires read/write permissions for contents and pull requests)
+
+---
+
+### `node-release.yaml`
+
+Performs a Node.js release: updates the changelog, tags a new version, and publishes a GitHub Release. Optionally force-updates a major version tag, useful for GitHub Actions.
+
+**Trigger:** `workflow_call`
+
+**Inputs:**
+| Input | Type | Required | Description |
+|-------|------|----------|-------------|
+| `version` | string | yes | Version to release |
+| `node_version` | string | yes | Node.js version to use with the `setup-node` action |
+| `update_major_version_tag` | boolean | no | Force update major version tag (e.g. for actions). Defaults to false. |
+
+**Required secrets:** `GITHUB_TOKEN`
 
 ---
 
