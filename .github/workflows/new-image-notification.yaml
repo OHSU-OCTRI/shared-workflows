@@ -1,5 +1,5 @@
 ---
-name: Notify DevOps repo of new image
+name: Notify repo of new image
 
 on:
   workflow_call:
