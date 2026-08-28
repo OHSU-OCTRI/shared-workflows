@@ -125,6 +125,23 @@ See `java-build.yaml` for a similar workflow that publishes the build artifacts 
 
 ---
 
+### `new-image-notification.yaml`
+
+Uses `repository_dispatch` to notify another repository when an image is pushed.
+
+**Trigger:** `workflow_call`
+
+**Inputs:**
+| Input | Type | Required | Description |
+|-------|------|----------|-------------|
+| `notify_repo` | string | yes | The repository to notify of the new image |
+| `image_name` | string | yes | The name of the image updated |
+| `image_digest` | string | yes | The new image's sha256 digest, as output by container-image-build.yaml or java-image-build.yaml |
+| `version_tag` | string | no | Optional image version tag (e.g. for a release) |
+
+**Required secrets:** `dispatch_token`, which must be a personal access token with `contents: write` permission on `notify_repo`.
+---
+
 ### `node-audit.yaml`
 
 Fixes security vulnerabilities in Node.js dependencies and creates a PR using a new branch. Output produced by `audit-step` is included in the PR body, and may indicate potential issues regarding breaking changes or dependency conflicts.
@@ -177,3 +194,21 @@ Runs Node.js tests. Your `package.json` file must have a script named `test:ci` 
 | `run_type_checks` | boolean | no | Whether to run type checks. Defaults to false. Requires a script named `test:types`. |
 
 **Required secrets:** None
+
+---
+
+### `update-manifests.yaml`
+
+Updates the Kubernetes manifests in a repository in response to a new image being pushed. Updates the image digests in the named YAML files, commits the changes, and makes a tag if `version-tag` is set. Changes are then pushed back to the repository.
+
+**Trigger:** `workflow_call`
+
+**Inputs:**
+| Input | Type | Required | Description |
+|-------|------|----------|-------------|
+| `image_name` | string | yes | Name of the image to update (e.g. ghcr.io/ohsu-octri/example) |
+| `image_digest` | string | yes | New image digest to set in manifests (as output by java-image-build.yaml or container-image-build.yaml) |
+| `yaml_files` | string | yes | List of YAML files to update. Comma or newline separated list of paths. |
+| `version_tag` | string | no | Optional version tag to set in manifests (e.g. for staging/production) |
+
+**Required secrets:** `GITHUB_TOKEN`

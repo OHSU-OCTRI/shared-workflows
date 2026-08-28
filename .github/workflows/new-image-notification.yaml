@@ -1,0 +1,53 @@
+---
+name: Notify repo of new image
+
+on:
+  workflow_call:
+    inputs:
+      notify_repo:
+        description: The repository to notify of the change
+        type: string
+        required: true
+      image_name:
+        description: Name of the image updated (e.g. ghcr.io/ohsu-octri/example)
+        type: string
+        required: true
+      image_digest:
+        description: The new image's sha256 digest
+        type: string
+        required: true
+      version_tag:
+        description: Optional image version tag (e.g. for a release)
+        type: string
+        required: false
+        default: ''
+    secrets:
+      dispatch_token:
+        description: 'Personal access token to use for the repository_dispatch call. Must have contents: write permission on the DevOps repo.'
+        required: true
+
+jobs:
+  notify-new-image:
+    runs-on: ubuntu-latest
+    steps:
+      # Strip the leading "v" from the version tag if present
+      - name: Normalize version tag
+        id: normalize-version
+        run: |
+          VERSION_TAG="${INPUT_VERSION#v}"
+          echo "version_tag=$VERSION_TAG" >> $GITHUB_OUTPUT
+        env:
+          INPUT_VERSION: ${{ inputs.version_tag }}
+
+      - name: Dispatch new_image event
+        uses: peter-evans/repository-dispatch@v4
+        with:
+          token: ${{ secrets.dispatch_token }}
+          repository: ${{ inputs.notify_repo }}
+          event-type: new_image
+          client-payload: |-
+            {
+              "image_name": "${{ inputs.image_name }}",
+              "image_digest": "${{ inputs.image_digest }}",
+              "version_tag": "${{ inputs.version_tag }}"
+            }

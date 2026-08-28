@@ -1,0 +1,85 @@
+---
+# Workflow that updates image references found in the specified manifests to a new
+# image digest and optional tag.
+name: Update Manifests
+
+on:
+  workflow_call:
+    inputs:
+      image_name:
+        description: Name of the image to update (e.g. ghcr.io/ohsu-octri/example)
+        type: string
+        required: true
+      image_digest:
+        description: New image digest to set in manifests
+        type: string
+        required: true
+      yaml_files:
+        description: List of YAML files to update. Comma or newline separated list of paths.
+        type: string
+        required: true
+      version_tag:
+        description: Optional version tag to set in manifests (e.g. for staging/production)
+        type: string
+        required: false
+        default: ''
+
+jobs:
+  update-manifests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Determine default branch
+        id: default_branch
+        run: echo "branch=${{ github.event.repository.default_branch }}" >> "$GITHUB_OUTPUT"
+
+      - name: Check out repository
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ steps.default_branch.outputs.branch }}
+          fetch-depth: 0
+
+      - name: Update image references
+        id: update
+        uses: ohsu-octri/k8s-image-update-action@v1
+        with:
+          image-name: ${{ inputs.image_name }}
+          image-digest: ${{ inputs.image_digest }}
+          yaml-files: ${{ inputs.yaml_files }}
+          version-tag: ${{ inputs.version_tag }}
+
+      - name: Check for changes
+        id: git_diff
+        run: |
+          if git diff --quiet; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Commit changes
+        if: steps.git_diff.outputs.changed == 'true'
+        env:
+          YAML_FILES: ${{ inputs.yaml_files }}
+          NEW_IMAGE: ${{ steps.update.outputs.new-image }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          echo "$YAML_FILES" | tr ',' '\n' | while IFS= read -r file; do
+            file="$(echo "$file" | xargs)"
+            [ -n "$file" ] && git add "$file"
+          done
+
+          git commit -m "Update ${{ inputs.image_name }} to ${NEW_IMAGE}"
+
+      - name: Create version tag
+        if: steps.git_diff.outputs.changed == 'true' && inputs.version_tag != ''
+        run: git tag "v${{ inputs.version_tag }}"
+
+      - name: Push changes
+        if: steps.git_diff.outputs.changed == 'true'
+        run: |
+          git push origin HEAD:${{ steps.default_branch.outputs.branch }}
+          if [ -n "${{ inputs.version_tag }}" ]; then
+            git push origin "v${{ inputs.version_tag }}"
+          fi
