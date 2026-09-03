@@ -49,5 +49,5 @@ jobs:
             {
               "image_name": "${{ inputs.image_name }}",
               "image_digest": "${{ inputs.image_digest }}",
-              "version_tag": "${{ inputs.version_tag }}"
+              "version_tag": "${{ steps.normalize-version.outputs.version_tag }}"
             }
