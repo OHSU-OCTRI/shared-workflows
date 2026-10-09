@@ -21,6 +21,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Handle self-contained image builds without artifacts (RFS-256)
 - Output image digest from image build workflows to facilitate GitOps workflows (CIS-3818)
+- Fixed issue with publishing to central.sonatype.com due to introduction of Maven 3.10.0 with the latest version of the Ubuntu runner (CIS-3914)
 
 ### Fixed
 
