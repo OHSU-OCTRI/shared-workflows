@@ -98,6 +98,9 @@ jobs:
           server-password: MAVEN_PASSWORD
           gpg-private-key: ${{ secrets.MAVEN_GPG_PRIVATE_KEY }}
           gpg-passphrase: MAVEN_GPG_PASSPHRASE
+          mvn-server-repository-origins: |
+            releases:https://central.sonatype.com
+            snapshots:https://central.sonatype.com
 
       - name: Publish release to Maven Central
         run: mvn deploy -DskipTests -Pci,publish
