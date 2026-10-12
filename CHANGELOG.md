@@ -26,6 +26,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Fixed an issue where the next development version after release was set to the release version
 - Fixed a bug in the `new-image-notification.yaml` workflow where the normalized version wasn't used (CIS-3850)
+- Use `MAVEN_ARGS` in java-build.yaml to circumvent an issue with Maven Publications until next release of setup-java action (CIS-3914)
 
 ### Dependencies
 
