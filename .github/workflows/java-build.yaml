@@ -83,6 +83,12 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+    env:
+      # Maven 3.10 only sends a server's credentials to the origins tied to its id, and 'central'
+      # is tied to repo.maven.apache.org, so snapshot deploys to central.sonatype.com get a 401.
+      # Restore id-only matching until setup-java releases mvn-server-repository-origins
+      # (actions/setup-java#1282), then replace this with that input.
+      MAVEN_ARGS: -Dmaven.repository.credentialScope=id
     steps:
       - name: Check out repository
         uses: actions/checkout@v7
