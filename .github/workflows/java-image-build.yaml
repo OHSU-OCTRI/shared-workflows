@@ -17,7 +17,6 @@ jobs:
   build-image:
     name: Build container image
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main' || github.ref_type == 'tag'
     permissions:
       contents: read
       packages: write
