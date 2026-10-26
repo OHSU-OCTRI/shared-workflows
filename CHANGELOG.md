@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added a workflow to audit and fix Node.js dependencies (CIS-3816)
 - Added a workflow to release Node.js projects (CIS-3818)
 - Add new workflows to automate manifest updates when images are pushed (CIS-3850)
+- Allow overriding container image tag configuration in `container-image-build.yaml`
 
 ### Changed
 
