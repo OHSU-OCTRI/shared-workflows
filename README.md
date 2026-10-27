@@ -27,6 +27,7 @@ Builds a container image and pushes to GitHub Container Registry. Optionally dow
 | `platforms` | string | no | Comma-separated string of platforms to include in the image (default: linux/amd64,linux/arm64). |
 | `artifact_name` | string | no | Optional artifact to download and use in the build, as created by `actions/upload-artifact`. |
 | `artifact_path` | string | no | Optional destination path for the downloaded artifact. |
+| `image_tags` | string | no | Optional newline-separated tag specification, as accepted by docker/metadata-action. By default, releases are tagged with the application version extracted from the git tag, and merges to the default branch are tagged `latest`. |
 
 **Outputs:**
 | Output | Type | Description |
