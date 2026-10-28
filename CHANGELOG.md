@@ -29,6 +29,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fixed an issue where the next development version after release was set to the release version
 - Fixed a bug in the `new-image-notification.yaml` workflow where the normalized version wasn't used (CIS-3850)
 - Use `MAVEN_ARGS` in java-build.yaml to circumvent an issue with Maven Publications until next release of setup-java action (CIS-3914)
+- Resolves issue with Maven Publication, removing the `MAVEN_ARGS` temporary fix in favor of a new parameter to `setup-java` (CIS-3922)
 
 ### Dependencies
 
@@ -38,3 +39,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Bumps [actions/setup-node](https://github.com/actions/setup-node) from 6 to 7
 - Bumps [docker/login-action](https://github.com/docker/login-action) from 4 to 4.5.2
 - Bumps [actions/setup-java](https://github.com/actions/setup-java) from 5 to 5.6.0
+- Bumps [actions/setup-java] from 5.6.0 to 6.1.0 (CIS-3922)
