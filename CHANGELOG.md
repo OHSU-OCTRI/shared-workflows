@@ -23,6 +23,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Handle self-contained image builds without artifacts (RFS-256)
 - Output image digest from image build workflows to facilitate GitOps workflows (CIS-3818)
 - Remove redundant branch checks from workflows that build images
+- Updated parameter names for deprecated `server-user` and `server-password` in `java-build.yaml`
 
 ### Fixed
 
@@ -30,6 +31,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fixed a bug in the `new-image-notification.yaml` workflow where the normalized version wasn't used (CIS-3850)
 - Use `MAVEN_ARGS` in java-build.yaml to circumvent an issue with Maven Publications until next release of setup-java action (CIS-3914)
 - Resolves issue with Maven Publication, removing the `MAVEN_ARGS` temporary fix in favor of a new parameter to `setup-java` (CIS-3922)
+- Fixed issue related to `server-id` values defined in `mvn-server-repository-origins`
 
 ### Dependencies
 
