@@ -1,0 +1,47 @@
+name: Playwright for Java Tests
+
+on:
+  workflow_call:
+    inputs:
+      java_version:
+        description: Java version to use with the setup-java action
+        type: string
+        required: true
+
+jobs:
+  e2e-tests:
+    name: Playwright end-to-end tests
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Set up Java environment
+        uses: actions/setup-java@v6.1.0
+        with:
+          distribution: temurin
+          java-version: ${{ inputs.java_version }}
+          cache: maven
+
+      - name: Install Playwright browser
+        run: >-
+          mvn -B -ntp exec:java -e
+          -Dexec.mainClass=com.microsoft.playwright.CLI
+          -Dexec.classpathScope=test
+          -Dexec.args="install --with-deps chromium"
+
+      - name: Run Playwright tests
+        run: mvn -B -ntp -Pe2e verify
+
+      - name: Upload Playwright traces and reports
+        uses: actions/upload-artifact@v7
+        if: ${{ !cancelled() }}
+        with:
+          name: playwright-report
+          path: |
+            target/playwright-java/
+            target/failsafe-reports/
+          retention-days: 14
+          if-no-files-found: ignore

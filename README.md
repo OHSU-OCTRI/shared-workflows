@@ -93,6 +93,30 @@ The `APP_JAR_NAME` repository variable must be set to the name of the applicatio
 
 ---
 
+### `java-playwright.yaml`
+
+Runs end-to-end tests for a Maven project using [Playwright for Java](https://playwright.dev/java/).
+
+Playwright traces and Failsafe reports from `target/playwright-java/` and `target/failsafe-reports/` are uploaded as the `playwright-report` artifact (retained for 14 days) unless the run is cancelled.
+
+The project must:
+
+- Declare the Playwright dependency with `test` scope.
+- Define an `e2e` Maven profile that configures `maven-failsafe-plugin` to run the end-to-end `*IT` test classes during the `verify` phase.
+- Manage its own test database instance, if one is needed (for example, using [Testcontainers](https://testcontainers.com/)).
+- Manage the creation and authentication of test accounts.
+
+**Trigger:** `workflow_call`
+
+**Inputs:**
+| Input | Type | Required | Description |
+|-------|------|----------|-------------|
+| `java_version` | string | yes | Java version for `setup-java` |
+
+**Required secrets:** None
+
+---
+
 ### `java-release.yaml`
 
 Performs a full Maven release: updates the changelog, cuts a Git tag, publishes a GitHub Release, updates Kubernetes manifests, and triggers artifact builds.
