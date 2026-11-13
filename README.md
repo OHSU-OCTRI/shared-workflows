@@ -15,6 +15,10 @@ jobs:
     secrets: inherit
 ```
 
+### Java dependency resolution
+
+The Java workflows (`java-build.yaml`, `java-test-build.yaml`, `java-playwright.yaml` and `java-release.yaml`) configure Maven to resolve dependencies from the organization's GitHub Packages registry (`https://maven.pkg.github.com/OHSU-OCTRI/*`) before Maven Central. OCTRI libraries are therefore resolved from GitHub Packages without any changes to the project's `pom.xml`. The repository is added through `setup-java`'s `mvn-repositories` input, with the automatically-provided `GITHUB_TOKEN` as credentials.
+
 ## Workflows
 
 ### `container-image-build.yaml`

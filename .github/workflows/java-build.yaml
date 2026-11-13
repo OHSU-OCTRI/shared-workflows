@@ -38,6 +38,9 @@ jobs:
     permissions:
       contents: read
       packages: write
+    env:
+      # Credentials for the default `github` server, used to resolve and publish packages
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - name: Check out repository
         uses: actions/checkout@v7
@@ -50,6 +53,10 @@ jobs:
           cache: maven
           gpg-private-key: ${{ secrets.MAVEN_GPG_PRIVATE_KEY }}
           gpg-passphrase: MAVEN_GPG_PASSPHRASE
+          # Resolve OCTRI dependencies from GitHub Packages before Maven Central
+          mvn-repositories: |
+            github:https://maven.pkg.github.com/${{ github.repository_owner }}/*:true
+          mvn-repositories-prioritize-central: false
 
       - name: Build and test
         run: mvn package
@@ -73,7 +80,6 @@ jobs:
         if: ${{ inputs.publish_to_github_packages }}
         run: mvn deploy -DskipTests -Pci
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           MAVEN_GPG_PASSPHRASE: ${{ secrets.MAVEN_GPG_PASSPHRASE }}
 
   publish-to-maven-central:
@@ -83,6 +89,10 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+      packages: read
+    env:
+      # Credentials for the `github` server, used to resolve packages
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - name: Check out repository
         uses: actions/checkout@v7
@@ -93,13 +103,19 @@ jobs:
           distribution: temurin
           java-version: ${{ inputs.java_version }}
           cache: maven
-          server-id: central
-          server-username-env-var: MAVEN_USERNAME
-          server-password-env-var: MAVEN_PASSWORD
           gpg-private-key: ${{ secrets.MAVEN_GPG_PRIVATE_KEY }}
           gpg-passphrase: MAVEN_GPG_PASSPHRASE
+          # Replaces server-id, which only supports a single server
+          mvn-server-credentials: |
+            central:MAVEN_USERNAME:MAVEN_PASSWORD
+            github:GITHUB_ACTOR:GITHUB_TOKEN
           mvn-server-repository-origins: |
             central:https://central.sonatype.com
+            github:https://maven.pkg.github.com
+          # Resolve OCTRI dependencies from GitHub Packages before Maven Central
+          mvn-repositories: |
+            github:https://maven.pkg.github.com/${{ github.repository_owner }}/*:true
+          mvn-repositories-prioritize-central: false
 
       - name: Publish release to Maven Central
         run: mvn deploy -DskipTests -Pci,publish

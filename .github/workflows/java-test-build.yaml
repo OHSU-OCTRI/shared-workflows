@@ -15,6 +15,9 @@ jobs:
     permissions:
       contents: read
       packages: write
+    env:
+      # Credentials for the default `github` server, used to resolve packages
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - name: Check out repository
         uses: actions/checkout@v7
@@ -25,6 +28,10 @@ jobs:
           distribution: temurin
           java-version: ${{ inputs.java_version }}
           cache: maven
+          # Resolve OCTRI dependencies from GitHub Packages before Maven Central
+          mvn-repositories: |
+            github:https://maven.pkg.github.com/${{ github.repository_owner }}/*:true
+          mvn-repositories-prioritize-central: false
 
       - name: Build and test
         run: mvn package
