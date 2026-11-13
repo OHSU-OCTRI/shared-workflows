@@ -30,7 +30,6 @@ jobs:
       contents: write
       packages: write
     env:
-      # Credentials for the default `github` server, used to resolve packages
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     steps:
@@ -43,7 +42,6 @@ jobs:
         distribution: 'temurin'
         java-version: ${{ inputs.java_version }}
         cache: 'maven'
-        # Resolve OCTRI dependencies from GitHub Packages before Maven Central
         mvn-repositories: |
           github:https://maven.pkg.github.com/${{ github.repository_owner }}/*:true
         mvn-repositories-prioritize-central: false
