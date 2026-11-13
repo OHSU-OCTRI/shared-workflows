@@ -29,6 +29,19 @@ Library repositories that consumers depend on as SNAPSHOTs should publish them t
 - Keep publishing SNAPSHOTs to Central (`publish_to_maven_central: true`), so local builds without a GitHub token can still resolve them.
 - Grant each consuming repository read access to the package under the package's **Manage Actions access** settings.
 
+### Maven dependency caching
+
+The `build-java-source` job in `java-build.yaml`, `java-test-build.yaml` and `java-playwright.yaml` cache `~/.m2/repository` with separate `actions/cache` restore and save steps, instead of `setup-java`'s `cache: maven`:
+
+- The cache key is `maven-<OS>-<job ID>--<hash of all pom.xml files>`.
+- If there's no exact match, the job restores its most recent cache for any pom hash, then the most recent Maven cache from any job. A pom change then only downloads new dependencies.
+- The cache is only saved from the default branch, and only when there was no exact match. Pull request and tag runs restore from the default branch's caches but don't save their own.
+- Before saving, the project's own artifacts are removed from the local repository with `build-helper:remove-project-artifact`.
+
+Pull request builds only get a cache if a default-branch run has saved one. Call `java-build.yaml` on pushes to the default branch. Its `build-java-source` job shares its job ID, and therefore its cache key, with `java-test-build.yaml`, so pull request builds can restore its cache exactly.
+
+`java-release.yaml` and the `publish-to-maven-central` job in `java-build.yaml` run infrequently and keep using `setup-java`'s built-in Maven cache.
+
 ## Workflows
 
 ### `container-image-build.yaml`

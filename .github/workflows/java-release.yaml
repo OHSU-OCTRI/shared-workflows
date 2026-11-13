@@ -43,18 +43,7 @@ jobs:
       with:
         distribution: 'temurin'
         java-version: ${{ inputs.java_version }}
-
-    # Used instead of setup-java's `cache: maven`, which has no fallback key and
-    # re-downloads every dependency whenever a pom.xml changes. The cache is
-    # only saved from the default branch; see the save step below.
-    - name: Restore Maven repository
-      uses: actions/cache/restore@v5
-      with:
-        path: ~/.m2/repository
-        key: maven-${{ runner.os }}-${{ github.job }}--${{ hashFiles('**/pom.xml') }}
-        restore-keys: |
-          maven-${{ runner.os }}-${{ github.job }}--
-          maven-${{ runner.os }}-
+        cache: 'maven'
 
     - name: Set up Git
       run: |
@@ -131,21 +120,3 @@ jobs:
         gh workflow run build.yaml --ref main
       env:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-    # Keep this project's own artifacts out of the saved cache
-    - name: Remove project artifacts from Maven cache
-      if: github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
-      run: mvn -B -ntp org.codehaus.mojo:build-helper-maven-plugin:3.6.1:remove-project-artifact
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-    # Caches saved from PR or tag refs can't be restored by other refs, so only
-    # the default branch saves. Unlike the other workflows, this doesn't skip on
-    # an exact hit: release:prepare bumps the pom.xml version, so the key is
-    # recomputed here and matches the next development version on main.
-    - name: Save Maven repository
-      if: github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
-      uses: actions/cache/save@v5
-      with:
-        path: ~/.m2/repository
-        key: maven-${{ runner.os }}-${{ github.job }}--${{ hashFiles('**/pom.xml') }}
