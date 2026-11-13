@@ -25,6 +25,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Output image digest from image build workflows to facilitate GitOps workflows (CIS-3818)
 - Remove redundant branch checks from workflows that build images
 - Updated parameter names for deprecated `server-user` and `server-password` in `java-build.yaml`
+- Java workflows set `OCTRI_GITHUB_SNAPSHOTS=true` to resolve OCTRI SNAPSHOT dependencies from GitHub Packages
+- Java workflows replace `setup-java`'s Maven cache with `actions/cache` steps to reduce downloads from Maven Central
+- Java workflows remove the project's own artifacts from the local Maven repository before saving the cache
 
 ### Fixed
 

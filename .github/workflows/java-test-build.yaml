@@ -15,6 +15,10 @@ jobs:
     permissions:
       contents: read
       packages: read
+    env:
+      # Activates the consumer pom profile that resolves OCTRI SNAPSHOTs from
+      # GitHub Packages via setup-java's default `github` server
+      OCTRI_GITHUB_SNAPSHOTS: 'true'
     steps:
       - name: Check out repository
         uses: actions/checkout@v7

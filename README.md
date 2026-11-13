@@ -15,6 +15,20 @@ jobs:
     secrets: inherit
 ```
 
+### OCTRI SNAPSHOT dependencies from GitHub Packages
+
+To avoid Maven Central rate limits, the Java workflows (`java-build.yaml`, `java-test-build.yaml`, `java-playwright.yaml` and `java-release.yaml`) set `OCTRI_GITHUB_SNAPSHOTS=true` on every job that uses `setup-java`'s default `github` server. These jobs pass `GITHUB_TOKEN` to their Maven steps and have at least `packages: read` permission.
+
+Consumer projects should define an env-activated Maven profile that, when `OCTRI_GITHUB_SNAPSHOTS` is `true`, resolves OCTRI SNAPSHOT dependencies from `https://maven.pkg.github.com/OHSU-OCTRI/*` using the server id `github`. Otherwise, the project falls back to Central's snapshot repository, as in local builds. The variable has no effect on projects without such a profile.
+
+The `publish-to-maven-central` job in `java-build.yaml` does not set the variable. Its `setup-java` configuration only provides the `central` server, so it keeps resolving SNAPSHOTs from Central.
+
+Library repositories that consumers depend on as SNAPSHOTs should publish them to GitHub Packages:
+
+- Set `publish_to_github_packages: true` in the caller workflow for builds of `main`.
+- Keep publishing SNAPSHOTs to Central (`publish_to_maven_central: true`), so local builds without a GitHub token can still resolve them.
+- Grant each consuming repository read access to the package under the package's **Manage Actions access** settings.
+
 ## Workflows
 
 ### `container-image-build.yaml`

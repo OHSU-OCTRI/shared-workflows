@@ -38,6 +38,10 @@ jobs:
     permissions:
       contents: read
       packages: write
+    env:
+      # Activates the consumer pom profile that resolves OCTRI SNAPSHOTs from
+      # GitHub Packages via setup-java's default `github` server
+      OCTRI_GITHUB_SNAPSHOTS: 'true'
     steps:
       - name: Check out repository
         uses: actions/checkout@v7
@@ -119,6 +123,9 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+    # OCTRI_GITHUB_SNAPSHOTS is deliberately not set here: setup-java only writes
+    # the `central` server for this job, so resolving from GitHub Packages would
+    # fail with a 401. SNAPSHOTs keep coming from Central's snapshot repository.
     steps:
       - name: Check out repository
         uses: actions/checkout@v7
