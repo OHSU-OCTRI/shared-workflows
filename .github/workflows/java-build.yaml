@@ -38,6 +38,10 @@ jobs:
     permissions:
       contents: read
       packages: write
+    env:
+      # Activates the consumer pom profile that resolves OCTRI SNAPSHOTs from
+      # GitHub Packages via setup-java's default `github` server
+      OCTRI_GITHUB_SNAPSHOTS: 'true'
     steps:
       - name: Check out repository
         uses: actions/checkout@v7
@@ -47,12 +51,26 @@ jobs:
         with:
           distribution: temurin
           java-version: ${{ inputs.java_version }}
-          cache: maven
           gpg-private-key: ${{ secrets.MAVEN_GPG_PRIVATE_KEY }}
           gpg-passphrase: MAVEN_GPG_PASSPHRASE
 
+      # Used instead of setup-java's `cache: maven`, which has no fallback key and
+      # re-downloads every dependency whenever a pom.xml changes. The cache is
+      # only saved from the default branch; see the save step below.
+      - name: Restore Maven repository
+        id: restore-maven-cache
+        uses: actions/cache/restore@v5
+        with:
+          path: ~/.m2/repository
+          key: maven-${{ runner.os }}-${{ github.job }}--${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            maven-${{ runner.os }}-${{ github.job }}--
+            maven-${{ runner.os }}-
+
       - name: Build and test
-        run: mvn package
+        run: mvn -B -ntp package
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Upload application JAR for container build
         if: vars.APP_JAR_NAME != ''
@@ -66,15 +84,37 @@ jobs:
       - name: Get version from POM
         id: get-version
         run: |
-          version=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
+          version=$(mvn -B -ntp help:evaluate -Dexpression=project.version -q -DforceStdout)
           echo "version=$version" >> $GITHUB_ENV
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Publish to GitHub Packages
         if: ${{ inputs.publish_to_github_packages }}
-        run: mvn deploy -DskipTests -Pci
+        run: mvn -B -ntp deploy -DskipTests -Pci
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           MAVEN_GPG_PASSPHRASE: ${{ secrets.MAVEN_GPG_PASSPHRASE }}
+
+      # Keep this project's own artifacts out of the saved cache
+      - name: Remove project artifacts from Maven cache
+        if: >-
+          github.ref == format('refs/heads/{0}', github.event.repository.default_branch) &&
+          steps.restore-maven-cache.outputs.cache-hit != 'true'
+        run: mvn -B -ntp org.codehaus.mojo:build-helper-maven-plugin:3.6.1:remove-project-artifact
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # Caches saved from PR or tag refs can't be restored by other refs, so only
+      # the default branch saves. An exact hit means this key already exists.
+      - name: Save Maven repository
+        if: >-
+          github.ref == format('refs/heads/{0}', github.event.repository.default_branch) &&
+          steps.restore-maven-cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v5
+        with:
+          path: ~/.m2/repository
+          key: maven-${{ runner.os }}-${{ github.job }}--${{ hashFiles('**/pom.xml') }}
 
   publish-to-maven-central:
     name: Publish to Maven Central
@@ -83,6 +123,9 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+    # OCTRI_GITHUB_SNAPSHOTS is deliberately not set here: setup-java only writes
+    # the `central` server for this job, so resolving from GitHub Packages would
+    # fail with a 401. SNAPSHOTs keep coming from Central's snapshot repository.
     steps:
       - name: Check out repository
         uses: actions/checkout@v7
@@ -102,7 +145,7 @@ jobs:
             central:https://central.sonatype.com
 
       - name: Publish release to Maven Central
-        run: mvn deploy -DskipTests -Pci,publish
+        run: mvn -B -ntp deploy -DskipTests -Pci,publish
         env:
           MAVEN_USERNAME: ${{ secrets.MAVEN_USERNAME }}
           MAVEN_PASSWORD: ${{ secrets.MAVEN_PASSWORD }}

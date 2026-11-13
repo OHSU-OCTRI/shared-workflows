@@ -29,6 +29,10 @@ jobs:
       actions: write
       contents: write
       packages: write
+    env:
+      # Activates the consumer pom profile that resolves OCTRI SNAPSHOTs from
+      # GitHub Packages via setup-java's default `github` server
+      OCTRI_GITHUB_SNAPSHOTS: 'true'
 
     steps:
     - name: Check out repository
@@ -73,6 +77,7 @@ jobs:
           -Dpassword=${{ secrets.GITHUB_TOKEN }} \
           release:prepare
       env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         VERSION: ${{ inputs.version }}
         DEV_VERSION: ${{ inputs.development_version }}
 
