@@ -15,6 +15,8 @@ jobs:
     permissions:
       contents: read
       packages: write
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - name: Check out repository
         uses: actions/checkout@v7
@@ -25,6 +27,9 @@ jobs:
           distribution: temurin
           java-version: ${{ inputs.java_version }}
           cache: maven
+          mvn-repositories: |
+            github:https://maven.pkg.github.com/${{ github.repository_owner }}/*:true
+          mvn-repositories-prioritize-central: false
 
       - name: Build and test
         run: mvn package

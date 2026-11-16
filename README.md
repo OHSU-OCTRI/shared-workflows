@@ -15,6 +15,12 @@ jobs:
     secrets: inherit
 ```
 
+### Java dependency resolution
+
+The Java workflows (`java-build.yaml`, `java-test-build.yaml`, `java-playwright.yaml` and `java-release.yaml`) configure Maven to resolve dependencies from the organization's GitHub Packages registry (`https://maven.pkg.github.com/OHSU-OCTRI/*`) before Maven Central. The repository is added through the `mvn-repositories` input to `setup-java`, and do not require any changes to `pom.xml`.
+
+Access to GitHub Packages is managed by the automatically-provided `GITHUB_TOKEN` credential. Caller workflows that set explicit `permissions` must grant at least `packages: read`.
+
 ## Workflows
 
 ### `container-image-build.yaml`
@@ -67,6 +73,8 @@ See `java-test-build.yaml` for a similar workflow that does not publish the buil
 
 **Required secrets:** `MAVEN_GPG_PRIVATE_KEY`, `MAVEN_GPG_PASSPHRASE`, `MAVEN_USERNAME`, `MAVEN_PASSWORD`
 
+**Required permissions:** `contents: read`, `packages: write`
+
 If the optional `APP_JAR_NAME` repository variable is defined, the specified JAR file in the `target` directory is uploaded for use by the `java-image-build.yaml` workflow.
 
 ---
@@ -115,6 +123,8 @@ The project must:
 
 **Required secrets:** None
 
+**Required permissions:** `contents: read`, `packages: read`
+
 ---
 
 ### `java-release.yaml`
@@ -133,6 +143,8 @@ Performs a full Maven release: updates the changelog, cuts a Git tag, publishes 
 
 **Required secrets/vars:** `GITHUB_TOKEN`, `IMAGE_NAME` (repository variable)
 
+**Required permissions:** `actions: write`, `contents: write`, `packages: write`
+
 ---
 
 ### `java-test-build.yaml`
@@ -147,6 +159,8 @@ See `java-build.yaml` for a similar workflow that publishes the build artifacts 
 | Input | Type | Required | Description |
 |-------|------|----------|-------------|
 | `java_version` | string | yes | Java version for `setup-java` |
+
+**Required permissions:** `contents: read`, `packages: write`
 
 ---
 

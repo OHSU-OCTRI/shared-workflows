@@ -25,6 +25,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Output image digest from image build workflows to facilitate GitOps workflows (CIS-3818)
 - Remove redundant branch checks from workflows that build images
 - Updated parameter names for deprecated `server-user` and `server-password` in `java-build.yaml`
+- Updated Java workflows to prioritize pulling from GitHub Packages before Maven Central (CIS-3960)
 
 ### Fixed
 
