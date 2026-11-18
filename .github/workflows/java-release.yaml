@@ -1,5 +1,5 @@
-# Maven cache: restores the cache saved by java-build.yaml (see that file).
-# Does not save. The release plugin and its SCM provider will miss.
+# Maven cache: documented in README.md - review before modifying.
+# * The release plugin and its SCM provider may miss.
 name: Java Release
 
 on:

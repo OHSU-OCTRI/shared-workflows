@@ -1,8 +1,5 @@
-# Maven cache: ~/.m2/repository is cached with actions/cache, keyed on pom.xml
-# and falling back to the most recent cache. The build job is the only Java
-# workflow job that saves it, on the default branch only, after removing
-# SNAPSHOTs and failed-download markers. 
-# Plugins from the `publish` profile may miss on the Maven Central Job.
+# Maven cache: documented in README.md - review before modifying.
+# * Plugins from the `publish` profile may miss on the Maven Central Job.
 name: Java Build and Publish
 
 on:
