@@ -26,11 +26,49 @@ jobs:
         with:
           distribution: temurin
           java-version: ${{ inputs.java_version }}
-          cache: maven
           mvn-repositories: |
             github:https://maven.pkg.github.com/${{ github.repository_owner }}/*:true
           mvn-repositories-prioritize-central: false
 
+      - name: Restore Maven repository
+        id: maven-cache
+        uses: actions/cache/restore@v5
+        with:
+          path: ~/.m2/repository
+          key: maven-${{ runner.os }}-e2e-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            maven-${{ runner.os }}-e2e-
+            maven-${{ runner.os }}-
+
+      # The browser cache is keyed on the browser build so that it is unaffected
+      # by unrelated pom.xml changes. If the browser builds cannot be 
+      # determined, browser caching is skipped.
+      - name: Determine Playwright browser builds
+        id: playwright-browsers
+        run: |
+          locations=$(mvn -B -ntp -q exec:java \
+            -Dexec.mainClass=com.microsoft.playwright.CLI \
+            -Dexec.classpathScope=test \
+            -Dexec.args="install --dry-run chromium" \
+            | grep 'Install location' | sort || true)
+          if [ -z "$locations" ]; then
+            echo "::warning ::Unable to determine Playwright browser builds; browsers will not be cached"
+            exit 0
+          fi
+          hash=$(echo "$locations" | sha256sum | cut -c1-16)
+          echo "key=playwright-${RUNNER_OS}-${ImageOS}-${RUNNER_ARCH}-${hash}" >> "$GITHUB_OUTPUT"
+
+      # Exact match only. A different browser build requires a full download.
+      - name: Restore Playwright browsers
+        id: playwright-cache
+        if: steps.playwright-browsers.outputs.key != ''
+        uses: actions/cache/restore@v5
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ steps.playwright-browsers.outputs.key }}
+
+      # Browser downloads are skipped when they are restored from the cache.
+      # System dependencies are always installed.
       - name: Install Playwright browser
         run: >-
           mvn -B -ntp exec:java -e
@@ -38,8 +76,39 @@ jobs:
           -Dexec.classpathScope=test
           -Dexec.args="install --with-deps chromium"
 
+      # Caches are only saved from the default branch. Other branches restore
+      # the default branch's cache, rather than saving copies of their own.
+      # Browsers are saved before the tests run, so test failures do not
+      # prevent caching.
+      - name: Save Playwright browsers
+        if: >-
+          steps.playwright-browsers.outputs.key != '' &&
+          steps.playwright-cache.outputs.cache-hit != 'true' &&
+          github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
+        uses: actions/cache/save@v5
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ steps.playwright-browsers.outputs.key }}
+
       - name: Run Playwright tests
         run: mvn -B -ntp -Pe2e verify
+
+      - name: Prune Maven repository
+        if: >-
+          steps.maven-cache.outputs.cache-hit != 'true' &&
+          github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
+        run: |
+          find ~/.m2/repository -type d -name '*-SNAPSHOT' -prune -exec rm -rf {} +
+          find ~/.m2/repository -name '*.lastUpdated' -delete
+
+      - name: Save Maven repository
+        if: >-
+          steps.maven-cache.outputs.cache-hit != 'true' &&
+          github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
+        uses: actions/cache/save@v5
+        with:
+          path: ~/.m2/repository
+          key: ${{ steps.maven-cache.outputs.cache-primary-key }}
 
       - name: Upload Playwright traces and reports
         uses: actions/upload-artifact@v7

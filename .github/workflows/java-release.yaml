@@ -41,10 +41,18 @@ jobs:
       with:
         distribution: 'temurin'
         java-version: ${{ inputs.java_version }}
-        cache: 'maven'
         mvn-repositories: |
           github:https://maven.pkg.github.com/${{ github.repository_owner }}/*:true
         mvn-repositories-prioritize-central: false
+
+    # Restore only: the cache is saved by java-build.yaml and
+    # java-test-build.yaml. The release plugin and its SCM provider will miss.
+    - name: Restore Maven repository
+      uses: actions/cache/restore@v5
+      with:
+        path: ~/.m2/repository
+        key: maven-${{ runner.os }}-${{ hashFiles('**/pom.xml') }}
+        restore-keys: maven-${{ runner.os }}-
 
     - name: Set up Git
       run: |

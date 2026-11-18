@@ -26,10 +26,36 @@ jobs:
         with:
           distribution: temurin
           java-version: ${{ inputs.java_version }}
-          cache: maven
           mvn-repositories: |
             github:https://maven.pkg.github.com/${{ github.repository_owner }}/*:true
           mvn-repositories-prioritize-central: false
 
+      # The cache is shared with java-build.yaml and java-release.yaml. Restored
+      # cache may include their plugins, but test plugins shouldn't miss.
+      - name: Restore Maven repository
+        id: maven-cache
+        uses: actions/cache/restore@v5
+        with:
+          path: ~/.m2/repository
+          key: maven-${{ runner.os }}-${{ hashFiles('**/pom.xml') }}
+          restore-keys: maven-${{ runner.os }}-
+
       - name: Build and test
         run: mvn package
+
+      - name: Prune Maven repository
+        if: >-
+          steps.maven-cache.outputs.cache-hit != 'true' &&
+          github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
+        run: |
+          find ~/.m2/repository -type d -name '*-SNAPSHOT' -prune -exec rm -rf {} +
+          find ~/.m2/repository -name '*.lastUpdated' -delete
+
+      - name: Save Maven repository
+        if: >-
+          steps.maven-cache.outputs.cache-hit != 'true' &&
+          github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
+        uses: actions/cache/save@v5
+        with:
+          path: ~/.m2/repository
+          key: ${{ steps.maven-cache.outputs.cache-primary-key }}
