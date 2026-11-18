@@ -1,3 +1,8 @@
+# Maven cache: ~/.m2/repository is cached with actions/cache, keyed on pom.xml
+# and falling back to the most recent cache. The build job is the only Java
+# workflow job that saves it, on the default branch only, after removing
+# SNAPSHOTs and failed-download markers. 
+# Plugins from the `publish` profile may miss on the Maven Central Job.
 name: Java Build and Publish
 
 on:
@@ -55,9 +60,6 @@ jobs:
             github:https://maven.pkg.github.com/${{ github.repository_owner }}/*:true
           mvn-repositories-prioritize-central: false
 
-      # The cache is shared with java-test-build.yaml, java-playwright.yaml and
-      # java-release.yaml. If those workflows save the cache, the deploy, gpg 
-      # and help plugins and any `ci` profile plugins may miss.
       - name: Restore Maven repository
         id: maven-cache
         uses: actions/cache/restore@v5

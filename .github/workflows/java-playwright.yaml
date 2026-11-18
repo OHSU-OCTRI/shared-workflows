@@ -1,3 +1,6 @@
+# Maven cache: restores the cache saved by java-build.yaml (see that file).
+# Does not save. The exec and failsafe plugins and any `e2e` profile plugins
+# and dependencies may miss.
 name: Playwright for Java Tests
 
 on:
@@ -30,9 +33,6 @@ jobs:
             github:https://maven.pkg.github.com/${{ github.repository_owner }}/*:true
           mvn-repositories-prioritize-central: false
 
-      # The cache is shared with java-build.yaml, java-test-build.yaml and
-      # java-release.yaml. If one of those saved it, the exec and failsafe
-      # plugins and any `e2e` profile plugins and dependencies may miss.
       - name: Restore Maven repository
         id: maven-cache
         uses: actions/cache/restore@v5
@@ -41,33 +41,6 @@ jobs:
           key: maven-${{ runner.os }}-${{ hashFiles('**/pom.xml') }}
           restore-keys: maven-${{ runner.os }}-
 
-      # The browser cache is keyed to the Chromium build instead of pom.xml. 
-      # If the browser builds cannot be determined, browser caching is skipped.
-      - name: Determine Playwright browser builds
-        id: playwright-browsers
-        run: |
-          locations=$(mvn -B -ntp -q exec:java \
-            -Dexec.mainClass=com.microsoft.playwright.CLI \
-            -Dexec.classpathScope=test \
-            -Dexec.args="install --dry-run chromium" \
-            | grep 'Install location' | sort || true)
-          if [ -z "$locations" ]; then
-            echo "::warning ::Unable to determine Playwright browser builds; browsers will not be cached"
-            exit 0
-          fi
-          hash=$(echo "$locations" | sha256sum | cut -c1-16)
-          echo "key=playwright-${RUNNER_OS}-${ImageOS}-${RUNNER_ARCH}-${hash}" >> "$GITHUB_OUTPUT"
-
-      - name: Restore Playwright browsers
-        id: playwright-cache
-        if: steps.playwright-browsers.outputs.key != ''
-        uses: actions/cache/restore@v5
-        with:
-          path: ~/.cache/ms-playwright
-          key: ${{ steps.playwright-browsers.outputs.key }}
-
-      # Browser downloads are skipped when they are restored from the cache.
-      # System dependencies are always installed.
       - name: Install Playwright browser
         run: >-
           mvn -B -ntp exec:java -e
@@ -75,35 +48,8 @@ jobs:
           -Dexec.classpathScope=test
           -Dexec.args="install --with-deps chromium"
 
-      - name: Save Playwright browsers
-        if: >-
-          steps.playwright-browsers.outputs.key != '' &&
-          steps.playwright-cache.outputs.cache-hit != 'true' &&
-          github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
-        uses: actions/cache/save@v5
-        with:
-          path: ~/.cache/ms-playwright
-          key: ${{ steps.playwright-browsers.outputs.key }}
-
       - name: Run Playwright tests
         run: mvn -B -ntp -Pe2e verify
-
-      - name: Prune Maven repository
-        if: >-
-          steps.maven-cache.outputs.cache-hit != 'true' &&
-          github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
-        run: |
-          find ~/.m2/repository -type d -name '*-SNAPSHOT' -prune -exec rm -rf {} +
-          find ~/.m2/repository -name '*.lastUpdated' -delete
-
-      - name: Save Maven repository
-        if: >-
-          steps.maven-cache.outputs.cache-hit != 'true' &&
-          github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
-        uses: actions/cache/save@v5
-        with:
-          path: ~/.m2/repository
-          key: ${{ steps.maven-cache.outputs.cache-primary-key }}
 
       - name: Upload Playwright traces and reports
         uses: actions/upload-artifact@v7

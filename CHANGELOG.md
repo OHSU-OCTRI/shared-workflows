@@ -27,7 +27,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Updated parameter names for deprecated `server-user` and `server-password` in `java-build.yaml`
 - Updated Java workflows to prioritize pulling from GitHub Packages before Maven Central (CIS-3960)
 - Cache Maven repo with `actions/cache` so the most recent default-branch cache is restored and only changed dependencies in `pom.xml` are downloaded (CIS-3962)
-- Cache Playwright browser downloads in `java-playwright.yaml` (CIS-3962)
 
 ### Fixed
 

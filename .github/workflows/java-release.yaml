@@ -1,3 +1,5 @@
+# Maven cache: restores the cache saved by java-build.yaml (see that file).
+# Does not save. The release plugin and its SCM provider will miss.
 name: Java Release
 
 on:
@@ -45,8 +47,6 @@ jobs:
           github:https://maven.pkg.github.com/${{ github.repository_owner }}/*:true
         mvn-repositories-prioritize-central: false
 
-    # Restore only: the cache is saved by java-build.yaml, java-test-build.yaml
-    # and java-playwright.yaml. The release plugin and SCM provider will miss.
     - name: Restore Maven repository
       uses: actions/cache/restore@v5
       with:
