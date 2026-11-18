@@ -30,8 +30,9 @@ jobs:
             github:https://maven.pkg.github.com/${{ github.repository_owner }}/*:true
           mvn-repositories-prioritize-central: false
 
-      # The cache is shared with java-build.yaml and java-release.yaml. Restored
-      # cache may include their plugins, but test plugins shouldn't miss.
+      # The cache is shared with java-build.yaml, java-playwright.yaml and
+      # java-release.yaml. Restored cache may include their plugins, but test
+      # plugins shouldn't miss.
       - name: Restore Maven repository
         id: maven-cache
         uses: actions/cache/restore@v5

@@ -30,19 +30,19 @@ jobs:
             github:https://maven.pkg.github.com/${{ github.repository_owner }}/*:true
           mvn-repositories-prioritize-central: false
 
+      # The cache is shared with java-build.yaml, java-test-build.yaml and
+      # java-release.yaml. If one of those saved it, the exec and failsafe
+      # plugins and any `e2e` profile plugins and dependencies may miss.
       - name: Restore Maven repository
         id: maven-cache
         uses: actions/cache/restore@v5
         with:
           path: ~/.m2/repository
-          key: maven-${{ runner.os }}-e2e-${{ hashFiles('**/pom.xml') }}
-          restore-keys: |
-            maven-${{ runner.os }}-e2e-
-            maven-${{ runner.os }}-
+          key: maven-${{ runner.os }}-${{ hashFiles('**/pom.xml') }}
+          restore-keys: maven-${{ runner.os }}-
 
-      # The browser cache is keyed on the browser build so that it is unaffected
-      # by unrelated pom.xml changes. If the browser builds cannot be 
-      # determined, browser caching is skipped.
+      # The browser cache is keyed to the Chromium build instead of pom.xml. 
+      # If the browser builds cannot be determined, browser caching is skipped.
       - name: Determine Playwright browser builds
         id: playwright-browsers
         run: |
@@ -58,7 +58,6 @@ jobs:
           hash=$(echo "$locations" | sha256sum | cut -c1-16)
           echo "key=playwright-${RUNNER_OS}-${ImageOS}-${RUNNER_ARCH}-${hash}" >> "$GITHUB_OUTPUT"
 
-      # Exact match only. A different browser build requires a full download.
       - name: Restore Playwright browsers
         id: playwright-cache
         if: steps.playwright-browsers.outputs.key != ''
@@ -76,10 +75,6 @@ jobs:
           -Dexec.classpathScope=test
           -Dexec.args="install --with-deps chromium"
 
-      # Caches are only saved from the default branch. Other branches restore
-      # the default branch's cache, rather than saving copies of their own.
-      # Browsers are saved before the tests run, so test failures do not
-      # prevent caching.
       - name: Save Playwright browsers
         if: >-
           steps.playwright-browsers.outputs.key != '' &&
