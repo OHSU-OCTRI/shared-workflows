@@ -21,6 +21,10 @@ The Java workflows (`java-build.yaml`, `java-test-build.yaml`, `java-playwright.
 
 Access to GitHub Packages is managed by the automatically-provided `GITHUB_TOKEN` credential. Caller workflows that set explicit `permissions` must grant at least `packages: read`.
 
+### Java dependency caching
+
+The Java workflows cache `~/.m2/repository` with `actions/cache`. When `pom.xml` changes, the most recent cache is restored, so only changed dependencies are downloaded. The cache is saved only by `java-build.yaml` on the default branch; the other Java workflows, other branches and PRs restore it. Unused caches expire after 7 days.
+
 ## Workflows
 
 ### `container-image-build.yaml`

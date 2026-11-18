@@ -1,3 +1,5 @@
+# Maven cache: documented in README.md - review before modifying.
+# * The exec and failsafe plugins and any `e2e` profile dependencies may miss.
 name: Playwright for Java Tests
 
 on:
@@ -26,10 +28,17 @@ jobs:
         with:
           distribution: temurin
           java-version: ${{ inputs.java_version }}
-          cache: maven
           mvn-repositories: |
             github:https://maven.pkg.github.com/${{ github.repository_owner }}/*:true
           mvn-repositories-prioritize-central: false
+
+      - name: Restore Maven repository
+        id: maven-cache
+        uses: actions/cache/restore@v5
+        with:
+          path: ~/.m2/repository
+          key: maven-${{ runner.os }}-${{ hashFiles('**/pom.xml') }}
+          restore-keys: maven-${{ runner.os }}-
 
       - name: Install Playwright browser
         run: >-
