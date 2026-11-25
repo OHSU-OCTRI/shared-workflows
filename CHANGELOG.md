@@ -27,6 +27,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Updated parameter names for deprecated `server-user` and `server-password` in `java-build.yaml`
 - Updated Java workflows to prioritize pulling from GitHub Packages before Maven Central (CIS-3960)
 - Cache Maven repo with `actions/cache` so the most recent default-branch cache is restored and only changed dependencies in `pom.xml` are downloaded (CIS-3962)
+- Build `github.ref_name` after Java releases to support Gitflow branching strategy (OPEN-483)
 
 ### Fixed
 
@@ -45,3 +46,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Bumps [docker/login-action](https://github.com/docker/login-action) from 4 to 4.5.2
 - Bumps [actions/setup-java](https://github.com/actions/setup-java) from 5 to 5.6.0
 - Bumps [actions/setup-java] from 5.6.0 to 6.1.0 (CIS-3922)
+
+### Removed
+
+- Remove obsolete `update_manifests` parameter from `java-release.yaml`

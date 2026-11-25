@@ -133,7 +133,7 @@ The project must:
 
 ### `java-release.yaml`
 
-Performs a full Maven release: updates the changelog, cuts a Git tag, publishes a GitHub Release, updates Kubernetes manifests, and triggers artifact builds.
+Performs a full Maven release: updates the changelog, cuts a Git tag, publishes a GitHub Release, and triggers artifact builds.
 
 **Trigger:** `workflow_call`
 
@@ -143,7 +143,6 @@ Performs a full Maven release: updates the changelog, cuts a Git tag, publishes 
 | `version` | string | yes | Version to release (e.g. `1.2.3`) |
 | `development_version` | string | yes | Next development version (e.g. `1.3.0`; `-SNAPSHOT` is appended automatically) |
 | `java_version` | string | yes | Java version for `setup-java` |
-| `update_manifests` | boolean | no | Whether to update image versions in Kubernetes manifests. Defaults to false. Requires the `IMAGE_NAME` repository variable to be defined. |
 
 **Required secrets/vars:** `GITHUB_TOKEN`, `IMAGE_NAME` (repository variable)
 
