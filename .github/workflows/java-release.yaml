@@ -17,11 +17,6 @@ on:
         description: Java version to use with the setup-java action
         type: string
         required: true
-      update_manifests:
-        description: Whether to update Kubernetes manifests. Requires setting an IMAGE_NAME variable in your repository.
-        type: boolean
-        required: false
-        default: false
 
 jobs:
   prepare-release:
@@ -99,23 +94,6 @@ jobs:
         tag_name: v${{ inputs.version }}
         generate_release_notes: false
 
-    - name: Update Kubernetes manifests
-      if: ${{ inputs.update_manifests }}
-      uses: fjogeleit/yaml-update-action@v0.17.0
-      with:
-        changes: |
-          {
-            "k8s/prod/deployment.yaml": {
-              "spec.template.spec.containers[0].image": "${{ vars.IMAGE_NAME }}:${{ inputs.version }}"
-            },
-            "k8s/stage/deployment.yaml": {
-              "spec.template.spec.containers[0].image": "${{ vars.IMAGE_NAME }}:${{ inputs.version }}"
-            }
-          }
-        branch: main
-        commitChange: true
-        message: "Update Kubernetes manifests for release ${{ inputs.version }}"
-
     - name: Build release artifacts
       run: |
         gh workflow run build.yaml --ref "v${VERSION}"
@@ -125,6 +103,6 @@ jobs:
 
     - name: Build snapshot artifacts
       run: |
-        gh workflow run build.yaml --ref main
+        gh workflow run build.yaml --ref ${{ github.ref_name }}
       env:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
